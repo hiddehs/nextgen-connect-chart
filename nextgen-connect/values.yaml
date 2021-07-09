@@ -5,7 +5,8 @@
 replicaCount: 1
 
 image:
-  repository: hiddehs/nextgen-connect:3.11
+  repository: ghcr.io/hiddehs/nextgen-connect
+#  repository: nginx
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
@@ -37,7 +38,7 @@ securityContext: {}
   # runAsUser: 1000
 
 service:
-  type: ClusterIP
+  type: NodePort
   port: 8443
 
 # TODO: support ingress with tls termination?
