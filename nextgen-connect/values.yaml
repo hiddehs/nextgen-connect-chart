@@ -1,15 +1,17 @@
 # Default values for nextgen-connect.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-
 replicaCount: 1
 
+postgresql:
+  postgresqlPassword: ""
+
 image:
-  repository: ghcr.io/hiddehs/nextgen-connect
+  repository: ghcr.io/hiddehs/nextgen-connect-chart
 #  repository: nginx
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "main"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -39,7 +41,6 @@ securityContext: {}
 
 service:
   type: NodePort
-  port: 8443
 
 # TODO: support ingress with tls termination?
 

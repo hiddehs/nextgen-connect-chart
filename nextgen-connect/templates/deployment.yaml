@@ -34,8 +34,11 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
+            - name: mirth-ssl
+              containerPort: 8443
+              protocol: TCP
             - name: mirth
-              containerPort: {{.Values.service.port}}
+              containerPort: 8080
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -45,6 +48,16 @@ spec:
             httpGet:
               path: /
               port: mirth
+          env:
+          - name: DATABASE_USERNAME
+            value: "postgres"
+          - name: JDBC_DATABASE_URL
+            value: "jdbc:postgresql://{{ .Chart.Name }}-postgresql:5432/postgres"
+          - name: DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Chart.Name }}-postgresql
+                key: postgresql-password
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

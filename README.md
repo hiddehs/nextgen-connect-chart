@@ -6,6 +6,10 @@ Mirth / NextGen Connect Helm Chart with pgsql
 - [ ] Ingress support 
 - [ ] TLS support 
 
+## Usage
+```bash
+helm install nextgen-connect hiddehs/nextgen-connect-chart --postgres.postgresqlPassword="supersecrethere"
+```
 
 
 ## Contents
