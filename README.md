@@ -2,7 +2,7 @@
 Mirth / NextGen Connect Helm Chart with pgsql 
 
 ## Todo
-- [ ] [critical] Postgres DB support
+- [x] [critical] Out-of-the-box Postgres DB support
 - [ ] Ingress support 
 - [ ] TLS support 
 
