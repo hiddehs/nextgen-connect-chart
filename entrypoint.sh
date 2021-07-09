@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+# Custom forced env variables
+export DATABASE=postgres
+export DATABASE_URL=$JDBC_DATABASE_URL
+
+
 custom_extension_count=`ls -1 /opt/connect/custom-extensions/*.zip 2>/dev/null | wc -l`
 if [ $custom_extension_count != 0 ]; then
 	echo "Found ${custom_extension_count} custom extensions."
@@ -17,13 +22,12 @@ sed -i "s/^keystore\.keypass\s*=\s*.*\$/keystore.keypass = ${KEYSTORE_PASS//\//\
 # merge the environment variables into /opt/connect/conf/mirth.properties
 
 # db type
-export DATABASE=postgres
+
 if ! [ -z "${DATABASE+x}" ]; then
 	sed -i "s/^database\s*=\s*.*\$/database = ${DATABASE//\//\\/}/" /opt/connect/conf/mirth.properties
 fi
 
 # db username
-export DATABASE_URL=$JDBC_DATABASE_URL
 if ! [ -z "${DATABASE_USERNAME+x}" ]; then
 	sed -i "s/^database\.username\s*=\s*.*\$/database.username = ${DATABASE_USERNAME//\//\\/}/" /opt/connect/conf/mirth.properties
 fi
