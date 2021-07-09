@@ -17,5 +17,5 @@ Following lines are added to the `entrypoint.sh` to make sure the connection wit
 
 ```bash
 export DATABASE=postgres
-`export DATABASE_URL=$JDBC_DATABASE_URL
+export DATABASE_URL=$JDBC_DATABASE_URL
 ```
