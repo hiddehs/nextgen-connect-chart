@@ -1,6 +1,4 @@
 FROM nextgenhealthcare/connect:3.11
-# ENV DATABASE postgres
-
 WORKDIR /opt/connect
 
 USER root

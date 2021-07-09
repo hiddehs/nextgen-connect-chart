@@ -1,9 +1,14 @@
 # nextgen-connect-chart
 Mirth / NextGen Connect Helm Chart with pgsql 
 
+## Todo
+- [ ] [critical] Postgres DB support
+- [ ] Ingress support 
+- [ ] TLS support 
+
+
 
 ## Contents
-
 
 - Mirth / NextGen Connect Docker image
   - Custom entrypoint.sh to support running Kubernetes instance

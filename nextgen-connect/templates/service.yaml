@@ -8,8 +8,8 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: http
+      targetPort: 8443
       protocol: TCP
-      name: http
+      name: mirth
   selector:
     {{- include "nextgen-connect.selectorLabels" . | nindent 4 }}

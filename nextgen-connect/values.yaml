@@ -40,6 +40,8 @@ service:
   type: ClusterIP
   port: 8443
 
+# TODO: support ingress with tls termination?
+
 ingress:
   enabled: false
   annotations: {}
@@ -69,11 +71,14 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
+
+# TODO: hpa support
+
 autoscaling:
   enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
+#  minReplicas: 1
+#  maxReplicas: 100
+#  targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
 nodeSelector: {}
