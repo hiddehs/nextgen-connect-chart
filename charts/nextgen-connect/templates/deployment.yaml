@@ -40,7 +40,7 @@ spec:
             - name: mirth
               containerPort: 8080
               protocol: TCP
-            - name: mirth
+            - name: http
               containerPort: 80
               protocol: TCP
           livenessProbe:
