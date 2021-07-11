@@ -3,6 +3,20 @@ entries:
   nextgen-connect:
   - apiVersion: v2
     appVersion: "3.11"
+    created: "2021-07-11T11:14:44.450926777Z"
+    dependencies:
+    - name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: ^10
+    description: A Helm chart for utilizing NextGen Connect' Docker image for k8s.
+    digest: 78373d5546a7bb94fb3d648d5ca9123c69620ba0d1b40a68afc3e88b3db5c93e
+    name: nextgen-connect
+    type: application
+    urls:
+    - https://github.com/hiddehs/nextgen-connect-chart/releases/download/nextgen-connect-1.0.1/nextgen-connect-1.0.1.tgz
+    version: 1.0.1
+  - apiVersion: v2
+    appVersion: "3.11"
     created: "2021-07-09T15:02:04.027740548Z"
     dependencies:
     - name: postgresql
@@ -15,4 +29,4 @@ entries:
     urls:
     - https://github.com/hiddehs/nextgen-connect-chart/releases/download/nextgen-connect-1.0.0/nextgen-connect-1.0.0.tgz
     version: 1.0.0
-generated: "2021-07-09T15:02:04.027756548Z"
+generated: "2021-07-11T11:14:44.450936577Z"
