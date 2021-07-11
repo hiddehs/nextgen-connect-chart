@@ -9,9 +9,8 @@ Mirth / NextGen Connect Helm Chart with pgsql
 ```bash
 helm repo add hiddehs-nextgen https://hiddehs.github.io/nextgen-connect-chart/
 helm repo update
-helm install nextgen-connect hiddehs-nextgen/nextgen-connect --set postgresql.postgresqlPassword="supersecrethere"
+helm install nextgen-connect hiddehs-nextgen/nextgen-connect --create-namespace --set postgresql.postgresqlPassword="supersecrethere"
 ```
-
 
 ## Contents
 
