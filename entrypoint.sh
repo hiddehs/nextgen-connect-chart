@@ -5,7 +5,6 @@ set -e
 export DATABASE=postgres
 export DATABASE_URL=$JDBC_DATABASE_URL
 
-
 custom_extension_count=`ls -1 /opt/connect/custom-extensions/*.zip 2>/dev/null | wc -l`
 if [ $custom_extension_count != 0 ]; then
 	echo "Found ${custom_extension_count} custom extensions."
@@ -200,7 +199,8 @@ if [ $db == "postgres" ] || [ $db == "mysql" ]; then
 	fi
 fi
 echo "Checking postgres connection by psql cmd"
-
+#apk add --update postgresql-client
+#echo 'psql -h "nextgen-connect-postgresql.default.svc.cluster.local" -p "5432" -U "postgres" -d "postgres"'
 count=0
 case "$db" in
 	"postgres" )
