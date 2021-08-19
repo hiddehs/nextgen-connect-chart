@@ -11,8 +11,6 @@ RUN unzip -qn fhir-3.11.0.b1424.zip
 
 WORKDIR /opt/connect
 
-RUN apt-get install -y postgresql-client
-
 COPY entrypoint.sh /
 RUN chmod 755 /entrypoint.sh
 ENTRYPOINT [ "/entrypoint.sh" ]
