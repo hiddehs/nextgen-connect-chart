@@ -46,6 +46,16 @@ if ! [ -z "${DATABASE_MAX_CONNECTIONS+x}" ]; then
 	sed -i "s/^database\.max-connections\s*=\s*.*\$/database.max-connections = ${DATABASE_MAX_CONNECTIONS//\//\\/}/" /opt/connect/conf/mirth.properties
 fi
 
+# database max retries
+if ! [ -z "${DATABASE_MAX_RETRY+x}" ]; then
+	sed -i "s/^database\.connection\.maxretry\s*=\s*.*\$/database.connection.maxretry = ${DATABASE_MAX_RETRY//\//\\/}/" /opt/connect/conf/mirth.properties
+fi
+
+# database retry wait time
+if ! [ -z "${DATABASE_RETRY_WAIT+x}" ]; then
+	sed -i "s/^database\.connection\.retrywaitinmilliseconds\s*=\s*.*\$/database.connection.retrywaitinmilliseconds = ${DATABASE_RETRY_WAIT//\//\\/}/" /opt/connect/conf/mirth.properties
+fi
+
 # keystore storepass
 if ! [ -z "${KEYSTORE_STOREPASS+x}" ]; then
 	sed -i "s/^keystore\.storepass\s*=\s*.*\$/keystore.storepass = ${KEYSTORE_STOREPASS//\//\\/}/" /opt/connect/conf/mirth.properties
@@ -54,6 +64,10 @@ fi
 # keystore keypass
 if ! [ -z "${KEYSTORE_KEYPASS+x}" ]; then
 	sed -i "s/^keystore\.keypass\s*=\s*.*\$/keystore.keypass = ${KEYSTORE_KEYPASS//\//\\/}/" /opt/connect/conf/mirth.properties
+fi
+
+if ! [ -z "${KEYSTORE_TYPE+x}" ]; then
+	sed -i "s/^keystore\.keypass\s*=\s*.*\$/keystore.type = ${KEYSTORE_TYPE//\//\\/}/" /opt/connect/conf/mirth.properties
 fi
 
 # license key
@@ -175,60 +189,70 @@ if [ -f /run/secrets/mcserver_vmoptions ]; then
     (cat /run/secrets/mcserver_vmoptions ; echo "") >> /opt/connect/mcserver.vmoptions
 fi
 
+# download jars from this url "$CUSTOM_JARS_DOWNLOAD", set by user
+if ! [ -z "${CUSTOM_JARS_DOWNLOAD+x}" ]; then
+	echo "Downloading Jars at ${CUSTOM_JARS_DOWNLOAD}"
+	if ! [ -z "${ALLOW_INSECURE}" ] && [ "${ALLOW_INSECURE}" == "true" ]; then
+		curl -ksSLf "${CUSTOM_JARS_DOWNLOAD}" -o  userJars.zip
+	else
+		curl -sSLf "${CUSTOM_JARS_DOWNLOAD}" -o userJars.zip
+	fi
+
+	# Unzipping contents of userJars.zip into /opt/connect/server-launcher-lib folder
+	if [ -e "userJars.zip" ]; then
+		echo "Unzipping contents of userJars.zip into /opt/connect/server-launcher-lib"
+		unzip userJars.zip -d  /opt/connect/server-launcher-lib
+		# removing the downloaded zip file
+		rm userJars.zip
+	fi
+
+fi
+
+
+# download extensions from this url "$EXTENSIONS_DOWNLOAD", set by user
+if ! [ -z "${EXTENSIONS_DOWNLOAD+x}" ]; then
+	echo "Downloading extensions at ${EXTENSIONS_DOWNLOAD}"
+	if ! [ -z "${ALLOW_INSECURE}" ] && [ "${ALLOW_INSECURE}" == "true" ]; then
+		curl -ksSLf "${EXTENSIONS_DOWNLOAD}" -o  userExtensions.zip || echo "problem with extensions download"
+	else
+		curl -sSLf "${EXTENSIONS_DOWNLOAD}" -o userExtensions.zip || echo "problem with extensions download"
+	fi
+
+	# Unzipping contents of userExtensions.zip
+	if [ -e "userExtensions.zip" ]; then
+		echo "Unzipping contents of userExtensions.zip"
+		mkdir /tmp/userextensions
+		unzip userExtensions.zip -d /tmp/userextensions
+		# removing the downloaded zip file
+		rm userExtensions.zip
+
+		# Unzipping contents of individual extension zip files into /opt/connect/extensions folder
+		zipFileCount=`ls -1 /tmp/userextensions/*.zip 2>/dev/null | wc -l`
+		if [ $zipFileCount != 0 ]; then
+			echo "Unzipping contents of /tmp/userextensions/ zips into /opt/connect/extensions"
+			for f in /tmp/userextensions/*.zip; do unzip "$f" -d /opt/connect/extensions; done
+			# removing the downloaded zip file
+			rm -rf /tmp/userextensions
+		fi
+	fi
+fi
+
+
+
+
+# download keystore
+if ! [ -z "${KEYSTORE_DOWNLOAD+x}" ]; then
+	echo "Downloading keystore at ${KEYSTORE_DOWNLOAD}"
+	if ! [ -z "${ALLOW_INSECURE}" ] && [ "${ALLOW_INSECURE}" == "true" ]; then
+		curl -ksSLf "${KEYSTORE_DOWNLOAD}" -o "/opt/connect/appdata/keystore.jks"
+	else
+		curl -sSLf "${KEYSTORE_DOWNLOAD}" -o "/opt/connect/appdata/keystore.jks"
+	fi
+fi
+
 # if delay is set as an environment variable then wait that long in seconds
 if ! [ -z "${DELAY+x}" ]; then
 	sleep $DELAY
 fi
-
-# check if DB is up
-# use the db type to attempt to connect to the db before starting connect to prevent connect from trying to start before the db is up
-# get the database properties from mirth.properties
-db=$(grep "^database\s*=" /opt/connect/conf/mirth.properties | sed -e 's/[^=]*=\s*\(.*\)/\1/')
-dbusername=$(grep "^database.username" /opt/connect/conf/mirth.properties | sed -e 's/[^=]*=\s*\(.*\)/\1/')
-dbpassword=$(grep "^database.password" /opt/connect/conf/mirth.properties | sed -e 's/[^=]*=\s*\(.*\)/\1/')
-dburl=$(grep "^database.url" /opt/connect/conf/mirth.properties | sed -e 's/[^=]*=\s*\(.*\)/\1/')
-
-if [ $db == "postgres" ] || [ $db == "mysql" ]; then
-	# parse host, port, and name
-	dbhost=$(echo $dburl | sed -e 's/.*\/\/\(.*\):.*/\1/')
-	dbport=$(echo $dburl | sed -e "s/.*${dbhost}:\(.*\)\/.*/\1/")
-	if [[ $dburl =~ "?" ]]; then
-		dbname=$(echo "${dburl}" | sed -e "s/.*${dbport}\/\(.*\)?.*/\1/")
-	else
-		dbname=$(echo "${dburl}" | sed -e "s/.*${dbport}\///")
-	fi
-fi
-echo "Checking postgres connection by psql cmd"
-#apk add --update postgresql-client
-#echo 'psql -h "nextgen-connect-postgresql.default.svc.cluster.local" -p "5432" -U "postgres" -d "postgres"'
-count=0
-case "$db" in
-	"postgres" )
-		until echo $dbpassword | psql -h "$dbhost" -p "$dbport" -U "$dbusername" -d "$dbname" -c '\l' >/dev/null 2>&1; do
-			let count=count+1
-			if [ $count -gt 30 ]; then
-				echo "Postgres is unavailable. Aborting."
-				exit 1
-			fi
-			sleep 1
-		done
-		;;
-	"mysql" )
-        echo "trying to connect to mysql"
-		until mysql -h "$dbhost" "-p${dbpassword}" -P "$dbport" -u "$dbusername" -e 'SHOW DATABASES' >/dev/null 2>&1; do
-			let count=count+1
-			if [ $count -gt 50 ]; then
-				# show the error
-				mysql -h "$dbhost" "-p${dbpassword}" -P "$dbport" -u "$dbusername" -e 'SHOW DATABASES'
-				echo "MySQL is unavailable. Aborting."
-				exit 1
-			fi
-			sleep 1
-		done
-		;;
-	*)
-        sleep 1
-		;;
-esac
 
 exec "$@"
